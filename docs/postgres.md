@@ -1,0 +1,78 @@
+```puml
+@startuml
+title postgres.pyのシーケンス
+participant term as "ターミナル"
+
+box app/lib
+participant main as "メイン"
+participant coaster as "制御器"
+participant stopwatch as "計測器"
+participant executor as "実行器"
+participant builder as "生成器"
+participant psyco as "psycogp2"
+end box
+
+participant postgres as "DB"
+
+term -> main: 実行
+activate main
+main -> psyco: init(url)
+activate psyco
+main -> psyco: get.connection
+activate psyco
+psyco -> postgres:
+activate postgres
+psyco <-- postgres:
+main <-- psyco: con
+main -> psyco: get.cursor(con)
+activate psyco
+main <-- psyco: cur
+main -> coaster
+activate coaster
+note right
+    cur, num
+end note
+
+loop num回数ループ
+    coaster -> stopwatch
+    note right
+        タイマー開始
+    end note
+    activate stopwatch
+    stopwatch -> executor
+    activate executor
+    note right
+        cur
+    end note
+    executor -> builder: SQLを生成
+    activate builder
+    return: SQL
+    executor -> psyco: cur.run(SQL)
+    activate psyco
+    psyco -> postgres: クエリ実行
+    activate postgres
+    return
+    return
+    return
+    return
+    note left
+        処理時間,ヒット件数
+    end note
+end
+coaster -> term: 測定結果
+note left
+標準出力
+end note
+return
+main -> psyco: cur.close()
+return
+main -> psyco: con.close()
+psyco -> postgres: close
+return
+return
+main -> psyco: destloy
+return
+return
+
+@enduml
+```
