@@ -3,6 +3,7 @@ import string
 import random
 import time
 import redis
+import pickle
 
 def randomname(n):
     # return ''.join(random.choices(string.ascii_letters + string.digits, k=n))
@@ -153,15 +154,14 @@ def item_red_executer(redis, inum):
 
 def gAi_red_executer(redis, gnum, inum):
     genres = [randomname(2) for i in range(gnum)]
+    genres_set = set(genres)
     vals = redis.mget([str(random.randint(0, 9999999)).zfill(8) for i in range(inum)])
     count = 0
     for val in vals:
-        if isinstance(val, bytes):
-            val = val.decode('utf-8')
-        for v in val.split(","):
-            for genre in genres:
-                if genre == v:
-                    count += 1
+        loads = pickle.loads(val)
+        loads_set = set(loads['genre'])
+        if len(genres_set & loads_set) > 0:
+            count += 1
     return count
 
 
@@ -189,8 +189,8 @@ def coaster(num, func, func2, *args, **kargs):
 url = "postgresql://hm3rd@127.0.01/postgres"
 con = psycopg2.connect(url)
 cur = con.cursor()
-num = 1
-inum = 4000
+num = 100
+inum = 8000
 gnum = 20
 
 print(genre_sql_builder(gnum))
@@ -203,9 +203,9 @@ print(gAi_sql_byJOIN_builder(gnum, inum))
 print(gAi_sql_outer_builder(gnum, inum))
 print(gAi_sql_app_builder(inum))
 
-print(coaster(num, speedgun, item_sql_executer, cur, inum))
-print(coaster(num, speedgun, item_sql_executer, cur, inum))
-print(coaster(num, speedgun, item_sql_byIN_executer, cur, inum))
+# print(coaster(num, speedgun, item_sql_executer, cur, inum))
+# print(coaster(num, speedgun, item_sql_executer, cur, inum))
+# print(coaster(num, speedgun, item_sql_byIN_executer, cur, inum))
 '''
 print(coaster(num, speedgun, item_sql_byINnotCast_executer, cur, inum))
 # print(coaster(num,speedgun,genre_sql_executer,cur,gnum))
@@ -220,6 +220,8 @@ cur.close()
 con.close()
 
 redis = redis.Redis(host='localhost', port=6379, db=0)
+print(coaster(num, speedgun, item_red_executer, redis, inum))
+print(coaster(num, speedgun, gAi_red_executer, redis, gnum, inum))
 print(coaster(num, speedgun, item_red_executer, redis, inum))
 print(coaster(num, speedgun, gAi_red_executer, redis, gnum, inum))
 
