@@ -50,14 +50,19 @@ async def async_create_data(filename):
     print("{} create finish".format(filename))
     return filename
 
+
+# コルーチンだとpickleにできないって怒られるので関数にする
 def zip_proc(corofn, *args):
+    # 改めてイベントループを作る
     loop = asyncio.new_event_loop()
     try:
+        # パラメータで受け取ったコルーチンをイベントループに登録
         coro = corofn(*args)
         asyncio.set_event_loop(loop)
         return loop.run_until_complete(coro)
     finally:
         loop.close()
+
 
 async def async_create_cors(ds):
     cors = []
