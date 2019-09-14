@@ -6,6 +6,7 @@ import string
 import pickle
 import lz4.frame
 import aiofiles
+import concurrent.futures
 
 DIR = 'data'
 os.makedirs(DIR, exist_ok=True)
@@ -49,15 +50,23 @@ async def async_create_data(filename):
     print("{} create finish".format(filename))
     return filename
 
+def zip_proc(corofn, *args):
+    loop = asyncio.new_event_loop()
+    try:
+        coro = corofn(*args)
+        asyncio.set_event_loop(loop)
+        return loop.run_until_complete(coro)
+    finally:
+        loop.close()
 
 async def async_create_cors(ds):
     cors = []
     i = 0
     # データセットのサイズ分タスクを作る
+
     for d in ds:
         filename = "{}/{}.lz4".format(DIR, str(i).zfill(16))
-        # cors.append(async_create_data(filename))
-        cors.append(async_zip(filename, d))
+        cors.append(loop.run_in_executor(executor, zip_proc, async_zip, filename, d))
         i += 1
     # タスクを実行
     done, pending = await asyncio.wait(cors)
@@ -72,6 +81,10 @@ dataset = [create_items(ITEM_NUM) for x in range(DATA_SIZE)]
 
 # ノンブロッキング用のループを作る
 loop = asyncio.get_event_loop()
+
+# multiprocess用のExecutorを用意
+executor = concurrent.futures.ProcessPoolExecutor()
+loop.set_default_executor(executor)
 
 start_time = datetime.datetime.now()
 
