@@ -11,8 +11,8 @@ import concurrent.futures
 DIR = 'data'
 os.makedirs(DIR, exist_ok=True)
 
-ITEM_NUM = 200
-DATA_SIZE = 10000
+ITEM_NUM = 5
+DATA_SIZE = 50000
 
 def randomname(n):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=n))
@@ -23,7 +23,7 @@ def create_items(n):
 
 def subproc_main(ds):
     async def async_zip(filename, d):
-        print("{} zip start".format(filename))
+        print("{} zip start len:{}".format(filename, len(d)))
         p = pickle.dumps(d)
         z = lz4.frame.compress(p)
         print("{} zip finish".format(filename))
@@ -33,10 +33,10 @@ def subproc_main(ds):
     async def async_write(filename, z):
         # セマフォで同時のwrite数を制限制限しておく
         with await sem:
-            print("{} write start".format(filename))
+            print("{} write start len:{}".format(filename, len(z)))
             # with open(filename, 'wb') as f:
             async with aiofiles.open(filename, 'wb') as f:
-                f.write(z)
+                await f.write(z)
             print("{} write finish".format(filename))
             return filename
 
