@@ -12,7 +12,7 @@ DIR = 'data'
 os.makedirs(DIR, exist_ok=True)
 
 ITEM_NUM = 200
-DATA_SIZE = 1000
+DATA_SIZE = 10000
 
 
 def randomname(n):
