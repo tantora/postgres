@@ -10,8 +10,8 @@ import aiofiles
 DIR = 'data'
 os.makedirs(DIR, exist_ok=True)
 
-ITEM_NUM = 2000
-DATA_SIZE = 2000
+ITEM_NUM = 200
+DATA_SIZE = 1000
 
 
 def randomname(n):

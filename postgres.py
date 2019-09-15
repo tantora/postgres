@@ -190,7 +190,7 @@ url = "postgresql://hm3rd@127.0.01/postgres"
 con = psycopg2.connect(url)
 cur = con.cursor()
 num = 100
-inum = 8000
+inum = 2000
 gnum = 20
 
 print(genre_sql_builder(gnum))

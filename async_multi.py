@@ -11,8 +11,8 @@ import concurrent.futures
 DIR = 'data'
 os.makedirs(DIR, exist_ok=True)
 
-ITEM_NUM = 2000
-DATA_SIZE = 2000
+ITEM_NUM = 200
+DATA_SIZE = 1000
 
 
 def randomname(n):
@@ -88,7 +88,7 @@ dataset = [create_items(ITEM_NUM) for x in range(DATA_SIZE)]
 loop = asyncio.get_event_loop()
 
 # multiprocess用のExecutorを用意
-executor = concurrent.futures.ProcessPoolExecutor()
+executor = concurrent.futures.ProcessPoolExecutor(max_workers=200)
 loop.set_default_executor(executor)
 
 start_time = datetime.datetime.now()
