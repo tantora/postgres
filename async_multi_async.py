@@ -48,8 +48,8 @@ def subproc_main(ds):
         await asyncio.wait(cors)
 
     loop = asyncio.new_event_loop()
-    sem = asyncio.Semaphore(2000, loop=loop)
     try:
+        sem = asyncio.Semaphore(2000, loop=loop)
         asyncio.set_event_loop(loop)
         return loop.run_until_complete(subproc_async_main(ds))
     finally:
