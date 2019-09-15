@@ -11,8 +11,8 @@ import concurrent.futures
 DIR = 'data'
 os.makedirs(DIR, exist_ok=True)
 
-ITEM_NUM = 200
-DATA_SIZE = 10000
+ITEM_NUM = 5
+DATA_SIZE = 50000
 
 
 def randomname(n):
@@ -38,7 +38,7 @@ async def async_write(filename, z):
         print("{} write start".format(filename))
         # with open(filename, 'wb') as f:
         async with aiofiles.open(filename, 'wb') as f:
-            f.write(z)
+            await f.write(z)
         print("{} write finish".format(filename))
         return filename
 
@@ -52,12 +52,38 @@ async def async_create_data(filename):
 
 
 # コルーチンだとpickleにできないって怒られるので関数にする
-def zip_proc(corofn, *args):
+def zip_proc(*args):
+    async def async_zip(filename, d, sem):
+        print("{} zip start".format(filename))
+        p = pickle.dumps(d)
+        z = lz4.frame.compress(p)
+        print("{} zip finish".format(filename))
+        await async_write(filename, z, sem)
+        return filename
+
+    async def async_write(filename, z, sem):
+        # セマフォで同時のwrite数を制限制限しておく
+        with await sem:
+            print("{} write start".format(filename))
+            # with open(filename, 'wb') as f:
+            async with aiofiles.open(filename, 'wb') as f:
+                await f.write(z)
+            print("{} write finish".format(filename))
+            return filename
+
+    async def async_create_data(filename):
+        print("{} create start".format(filename))
+        d = create_items(ITEM_NUM)
+        await async_zip(filename, d)
+        print("{} create finish".format(filename))
+        return filename
+
     # 改めてイベントループを作る
     loop = asyncio.new_event_loop()
     try:
         # パラメータで受け取ったコルーチンをイベントループに登録
-        coro = corofn(*args)
+        sem = asyncio.Semaphore(2000, loop=loop)
+        coro = async_zip(*args, sem)
         asyncio.set_event_loop(loop)
         return loop.run_until_complete(coro)
     finally:
@@ -71,15 +97,13 @@ async def async_create_cors(ds):
 
     for d in ds:
         filename = "{}/{}.lz4".format(DIR, str(i).zfill(16))
-        cors.append(loop.run_in_executor(executor, zip_proc, async_zip, filename, d))
+        cors.append(loop.run_in_executor(executor, zip_proc, filename, d))
         i += 1
     # タスクを実行
     done, pending = await asyncio.wait(cors)
     return done, pending
 
 
-# セマフォ　いったんグローバルにする
-sem = asyncio.Semaphore(2000)
 
 # データセットを作る
 dataset = [create_items(ITEM_NUM) for x in range(DATA_SIZE)]
@@ -102,6 +126,3 @@ finish_time = datetime.datetime.now()
 print("start  : {}".format(start_time))
 print("finish : {}".format(finish_time))
 
-for d in done:
-    dr = d.result()
-    # print(dr)
