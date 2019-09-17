@@ -11,8 +11,9 @@ import concurrent.futures
 DIR = 'data'
 os.makedirs(DIR, exist_ok=True)
 
-ITEM_NUM = 50
-DATA_SIZE = 10000
+ITEM_NUM = 1000
+DATA_SIZE = 1000
+WORKERS_NUM = 4
 
 def randomname(n):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=n))
@@ -57,15 +58,13 @@ def subproc_main(ds):
 
 # データセットを作る
 dataset = [[x, create_items(ITEM_NUM)] for x in range(DATA_SIZE)]
-
+sub_ds = [dataset[i::WORKERS_NUM] for i in range(WORKERS_NUM)]
 
 # multiprocess用のExecutorを用意
-WORKERS_NUM = 4
 executor = concurrent.futures.ProcessPoolExecutor(max_workers=WORKERS_NUM)
 
 start_time = datetime.datetime.now()
 
-sub_ds = [dataset[i::WORKERS_NUM] for i in range(WORKERS_NUM)]
 
 futures = [executor.submit(subproc_main, sub_ds[i]) for i in range(WORKERS_NUM)]
 
