@@ -12,7 +12,7 @@ DIR = 'data'
 os.makedirs(DIR, exist_ok=True)
 
 ITEM_NUM = 1000
-DATA_SIZE = 100000
+DATA_SIZE = 1000
 WORKERS_NUM = 4
 
 def randomname(n):
@@ -77,4 +77,5 @@ finish_time = datetime.datetime.now()
 
 print("start  : {}".format(start_time))
 print("finish : {}".format(finish_time))
+print("elaspred time : {}".format(finish_time - start_time))
 

@@ -11,8 +11,8 @@ import concurrent.futures
 DIR = 'data'
 os.makedirs(DIR, exist_ok=True)
 
-ITEM_NUM = 5
-DATA_SIZE = 50000
+ITEM_NUM = 1000
+DATA_SIZE = 1000
 
 
 def randomname(n):

@@ -61,7 +61,8 @@ dataset = [[x, create_items(ITEM_NUM)] for x in range(DATA_SIZE)]
 sub_ds = [dataset[i::WORKERS_NUM] for i in range(WORKERS_NUM)]
 
 # multiprocess用のExecutorを用意
-executor = concurrent.futures.ProcessPoolExecutor(max_workers=WORKERS_NUM)
+#executor = concurrent.futures.ProcessPoolExecutor(max_workers=WORKERS_NUM)
+executor = concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS_NUM)
 
 start_time = datetime.datetime.now()
 
@@ -76,4 +77,5 @@ finish_time = datetime.datetime.now()
 
 print("start  : {}".format(start_time))
 print("finish : {}".format(finish_time))
+print("elaspred time : {}".format(finish_time - start_time))
 
