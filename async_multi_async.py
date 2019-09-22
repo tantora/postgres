@@ -12,7 +12,7 @@ import numpy as np
 DIR = 'data'
 os.makedirs(DIR, exist_ok=True)
 
-ITEM_NUM = 5000
+ITEM_NUM = 10000
 DATA_SIZE = 10000
 WORKERS_NUM = 4
 SEM_NUM = 1000
